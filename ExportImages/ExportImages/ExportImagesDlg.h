@@ -33,6 +33,7 @@ protected:
 	afx_msg HCURSOR OnQueryDragIcon();
 	afx_msg void OnBnClickedBtnSel1();
 	afx_msg void OnBnClickedBtnSel2();
+	afx_msg void OnBnClickedBtnSel3();
 	afx_msg void OnBnClickedBtnStart();
 	afx_msg void OnBnClickedBtnStop();
 	DECLARE_MESSAGE_MAP()
@@ -43,4 +44,5 @@ private:
 
 	CString m_cstrSavePath;
 	CString m_cstrExportPath;
+	CString m_cstrFilePath;
 };

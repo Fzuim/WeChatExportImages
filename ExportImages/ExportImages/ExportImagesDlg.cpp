@@ -24,6 +24,7 @@ CExportImagesDlg::CExportImagesDlg(CWnd* pParent /*=NULL*/)
 	m_hExportThread = NULL;
 	m_cstrSavePath = _T("");
 	m_cstrExportPath = _T("");
+	m_cstrFilePath = _T("");
 }
 
 void CExportImagesDlg::DoDataExchange(CDataExchange* pDX)
@@ -38,6 +39,7 @@ BEGIN_MESSAGE_MAP(CExportImagesDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SEL2, &CExportImagesDlg::OnBnClickedBtnSel2)
 	ON_BN_CLICKED(IDC_BTN_START, &CExportImagesDlg::OnBnClickedBtnStart)
 	ON_BN_CLICKED(IDC_BTN_STOP, &CExportImagesDlg::OnBnClickedBtnStop)
+	ON_BN_CLICKED(IDC_BTN_SEL3, &CExportImagesDlg::OnBnClickedBtnSel3)
 END_MESSAGE_MAP()
 
 
@@ -175,10 +177,11 @@ void CExportImagesDlg::OnBnClickedBtnStart()
 	// TODO:  在此添加控件通知处理程序代码
 	GetDlgItem(IDC_EDIT_SPATH)->GetWindowText(m_cstrSavePath);
 	GetDlgItem(IDC_EDIT_EPATH)->GetWindowText(m_cstrExportPath);
+	GetDlgItem(IDC_EDIT_FILE)->GetWindowText(m_cstrFilePath);
 
-	if (_T("") == m_cstrSavePath || _T("") == m_cstrExportPath)
+	if (_T("") == m_cstrFilePath && (_T("") == m_cstrSavePath || _T("") == m_cstrExportPath))
 	{
-		AfxMessageBox(_T("请选择相关存储位置!"));
+		AfxMessageBox(_T("请选择相关文件位置!"));
 		return;
 	}
 
@@ -205,16 +208,26 @@ void CExportImagesDlg::OnBnClickedBtnStop()
 
 void CExportImagesDlg::doExport()
 {
-	CString cstrImagePath = m_cstrSavePath + IMAGE_PATH_KEYSTR;
+	if (_T("") != m_cstrFilePath)
+	{
+		DatConverImage(m_cstrFilePath, m_cstrFilePath);
+	}
+	else 
+	{
+		CString cstrImagePath = m_cstrSavePath + IMAGE_PATH_KEYSTR;
 
-	FindFilesInDir(cstrImagePath);
+		FindFilesInDir(cstrImagePath);
+
+		GetDlgItem(IDC_BTN_START)->EnableWindow(TRUE);
+		GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
+
+		CString cstrInfo = _T("");
+		cstrInfo.Format(_T("导出完成，请打开文件夹[%s]查看！"), m_cstrExportPath);
+		GetDlgItem(IDC_STATIC_INFO)->SetWindowText(cstrInfo);
+	}
 
 	GetDlgItem(IDC_BTN_START)->EnableWindow(TRUE);
 	GetDlgItem(IDC_BTN_STOP)->EnableWindow(FALSE);
-
-	CString cstrInfo = _T("");
-	cstrInfo.Format(_T("导出完成，请打开文件夹[%s]查看！"), m_cstrExportPath);
-	GetDlgItem(IDC_STATIC_INFO)->SetWindowText(cstrInfo);
 	AfxMessageBox(_T("导出完成！"));
 }
 
@@ -406,5 +419,20 @@ void CExportImagesDlg::XOR(BYTE* v_pbyBuf, DWORD v_dwBufLen, BYTE byXOR)
 	for (int i = 0; i < v_dwBufLen; i++)
 	{
 		v_pbyBuf[i] ^= byXOR;
+	}
+}
+
+
+void CExportImagesDlg::OnBnClickedBtnSel3()
+{
+	// TODO:  在此添加控件通知处理程序代码
+	CFileDialog dlgFile(TRUE, NULL, NULL, OFN_HIDEREADONLY | OFN_ALLOWMULTISELECT, _T("Target Files (*.*)|*.*|All Files (*.*)|*.*||"), NULL);
+	if (dlgFile.DoModal())
+	{
+		POSITION Position = dlgFile.GetStartPosition();
+		if (Position != NULL)
+		{
+			GetDlgItem(IDC_EDIT_FILE)->SetWindowText(dlgFile.GetNextPathName(Position));
+		}
 	}
 }
